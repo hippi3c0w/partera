@@ -105,6 +105,14 @@ while getopts ":u:r:" opt; do
 		cd ${OPTARG}
 		#mv ${OPTARG}.sh ${OPTARG}
 		cp -pv ${OPTARG} /usr/bin/
+		if [[ -f style ]];then
+			if [[ -d "/var/partera/pretty/${OPTARG}" ]];then
+				cp -pv style /var/partera/pretty/${OPTARG}
+			else
+				mkdir -p /var/partera/pretty/${OPTARG}
+				cp -pv style /var/partera/pretty/${OPTARG}
+			fi
+		fi
 		echo "${OPTARG} created successfully into your machine"
 		;;
 
