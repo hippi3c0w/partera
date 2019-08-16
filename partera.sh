@@ -1,0 +1,123 @@
+#!/bin/bash
+################################################
+#											   #
+#   Partera is a new way to download only      #
+#   authorized software from git repositories  #
+#                                              #
+#											   #
+#   Made by: Manu Alén-@hippi3c0w              #
+#   manualen@protonmail.com                    #
+#   Version: 1.0                               #
+################################################
+echo "
+==================================
+Made by: Manu Alén-@hippi3c0w
+manualen@protonmail.com
+Version: 1.0
+=================================="
+echo " "
+#####################
+#    Color Vars     #
+#####################
+
+#Color variables
+BLACK='\033[0;30m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+ORANGE='\033[0;33m'
+PURPLE='\033[0;34m'
+CYAN='\033[0;35m'
+LIGHTGRAY='\033[0;36m'
+NC='\033[0m'
+DARKGRAY='\033[1;30m'
+LIGHTRED='\033[1;31m'
+LIGHTGREEN='\033[1;32m'
+LIGHTORANGE='\033[1;33m'
+LIGHTPURPLE='\033[1;34m'
+LIGHTCYAN='\033[1;35m'
+#####################
+#     Functions     #
+#####################
+function check_sources(){
+	if [[ -f "/var/partera/sources.list" ]];then
+		sleep 1
+		echo "File /var/partera/sources.list exists. Going to next step"
+		sleep 2
+	else
+		echo "File /var/partera/sources.list doesn't exist, goint to create it with default repositories. Please wait"
+		sleep 3
+		g++ creator_sourcelists.cpp -o creator_sourcelists
+		sleep 3
+		./creator_sourcelists
+		sleep 2
+		echo "File /var/partera/sources.list created!!"
+	fi
+
+}
+
+function usage(){
+	echo "-u: Specify the git user"
+	echo "-r: Specify the git repo"
+		printf "\n"
+	echo "Examples of use"
+	echo "========================="
+	echo "partera -u [USER] -r [REPO] "
+}
+#####################
+#     Code Logic    #
+#####################
+echo "Checking if the necessary folders exist"
+sleep 2
+
+#####Check if the sources.list exists or not.
+if [[ -d "/var/partera" ]];then
+	echo "The folder exists"
+	check_sources
+else
+	echo "The folder doesn't exist. Going to create it"
+	sleep 2
+	mkdir -p /var/partera
+	echo "Folder /var/partera created"
+	check_sources
+
+fi
+
+while getopts ":u:r:" opt; do
+  case $opt in
+  	u)
+		user=`cat /var/partera/sources.list | grep -n ${OPTARG} | cut -d ":" -f2,3`
+		if [[ $user ]];then
+			echo "User exists"
+			sleep 2
+		else
+			exit 0
+		fi 
+		
+		sleep 1
+
+		;;
+	r)
+		repo=`echo $user${OPTARG}.git`
+		#echo $repo
+		sleep 3
+		echo "Going to download the repo specified. Please wait"
+		git clone $repo
+		cd ${OPTARG}
+		#mv ${OPTARG}.sh ${OPTARG}
+		cp -pv ${OPTARG} /usr/bin/
+		echo "${OPTARG} created successfully into your machine"
+		;;
+
+	\?)
+		echo -e "[${RED}!${NC}] Invalid option, please choose a valid one"
+		sleep 2
+		usage
+		;;
+	:)
+		echo -e "[${GREEN}?${NC}] Hey, this program requires (at least) one option"
+		sleep 2
+		usage
+		;;
+	esac
+done
+exit 0
